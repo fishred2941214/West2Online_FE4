@@ -1,0 +1,147 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>一个 聊天室</title>
+        <link rel="stylesheet" href="main.css">
+        <script src="http://cdn.static.runoob.com/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script>
+        $(document).ready(function(){
+            const url = 'http://127.0.0.1:3000';  
+            
+          
+            let socket = io.connect(url);  
+
+            socket.on('connect', function() {
+
+            document.getElementById('name').focus();
+
+            
+            });
+
+           let _displayNewMsg = function(user, msg) {
+
+                var container = document.getElementById('main'),
+
+                msgToDisplay = document.createElement('ul');
+
+                msgToDisplay.innerHTML = user + ' : ' + msg;
+
+                container.appendChild(msgToDisplay);
+
+                container.scrollTop = container.scrollHeight;
+
+            };
+
+        
+
+            document.getElementById('loginbutton').addEventListener('click', function() {
+
+                var nickName = document.getElementById('name').value;
+
+                if (nickName.trim().length != 0) {
+
+                    socket.emit('login', nickName);
+
+                } else {
+
+                    document.getElementById('name').focus();
+
+                };
+
+            }, false);
+
+            document.getElementById('send').addEventListener('click', function() {
+
+                var messageInput = document.getElementById('mymsg');
+
+                var msg = messageInput.value;
+
+                messageInput.value = '';
+
+                messageInput.focus();
+
+                if (msg.trim().length != 0) {
+
+                    socket.emit('postMsg', msg);
+
+                    _displayNewMsg('me', msg);
+
+                    return;
+
+                };
+
+            }, false);
+
+
+            socket.on('nickExisted', function() {
+
+                alert("用户名重复！请重新输入！")
+
+            });
+
+            socket.on('loginSuccess', function(num) {
+
+                document.getElementById('login').style.display = 'none';
+
+                document.getElementById('mymsg').focus();
+
+                alert("欢迎进入聊天室！");
+
+                document.getElementById('num').innerHTML = num;
+
+            });
+
+            socket.on('newMsg', function(user, msg) {
+
+                _displayNewMsg(user, msg);
+
+            });
+
+           
+        });
+        
+        
+        
+        
+        </script>  
+        <script src="/socket.io/socket.io.js"></script> 
+    </head>
+    <body>
+        <div id='chat'>
+            <div class='title'>
+                <h1>世纪佳缘</h1>
+                <h2>网络一线牵，珍惜这段缘</h2>
+                <span id='num'>0</span><span>人在线</span>
+            </div>
+            
+            <div id='main'>
+                <!--
+                    
+                    <ul id='chat'>
+                    
+                        <span class='nickname'></span>
+                    
+                    </ul>
+                    
+
+                    
+                
+                -->
+
+            </div>
+            <div class='under'>
+                <textarea id='mymsg'></textarea>
+                <button id='send'>发送</button>
+
+            </div>
+        </div>
+            <div id='login'>
+                <p id = 'cue'>input your nickname...</p>
+                <input type='text' id='name' />
+                <input type='button' id='loginbutton' value='login'/>
+                
+            </div>   
+        
+    </body>
+</html>
